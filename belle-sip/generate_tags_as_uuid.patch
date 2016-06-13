@@ -1,0 +1,53 @@
+/* This patch forces belle-sip library to generate
+ * SIP header FROM tags as UUID sequence.
+ * This is done for making belle-sip library consistent with
+ * the requirements of most general SIP servers.
+ * Author: Dmitriy Rybalkin <dmitriy.rybalkin@gmail.com>
+ */
+diff --git a/src/belle_sip_internal.h b/src/belle_sip_internal.h
+--- a/src/belle_sip_internal.h	2016-03-31 13:28:46.406055281 +0600
++++ b/src/belle_sip_internal.h	2016-03-31 13:32:13.410057728 +0600
+@@ -965,7 +965,7 @@
+ 
+ #define BELLE_SIP_BRANCH_ID_LENGTH 10
+ /*Shall not be less than 32bit */
+-#define BELLE_SIP_TAG_LENGTH 6
++#define BELLE_SIP_TAG_LENGTH 37
+ #define BELLE_SIP_MAX_TO_STRING_SIZE 2048
+ 
+ void belle_sip_header_contact_set_unknown(belle_sip_header_contact_t *a, int value);
+diff --git a/src/belle_sip_headers_impl.c b/src/belle_sip_headers_impl.c
+--- a/src/belle_sip_headers_impl.c	2016-03-31 13:24:06.030051965 +0600
++++ b/src/belle_sip_headers_impl.c	2016-03-31 13:32:25.030057866 +0600
+@@ -29,6 +29,8 @@
+ #include "belle_sip_internal.h"
+ #include "listeningpoint_internal.h"
+ 
++#define BELLE_SIP_RANDOM_TAG 1
++
+ /************************
+  * header
+  ***********************/
+@@ -490,7 +490,8 @@
+ 
+ void belle_sip_header_from_set_random_tag(belle_sip_header_from_t *obj){
+ 	char tmp[BELLE_SIP_TAG_LENGTH];
+-	belle_sip_header_from_set_raw_tag(obj,belle_sip_random_token(tmp,sizeof(tmp)));
++	/*belle_sip_header_from_set_raw_tag(obj,belle_sip_random_token(tmp,sizeof(tmp)));*/
++	belle_sip_header_from_set_raw_tag(obj,belle_sip_generate_uuid(tmp));
+ }
+ 
+ void belle_sip_header_from_set_tag(belle_sip_header_from_t *obj, const char *tag){
+@@ -554,9 +555,10 @@
+ 	return header;
+ }
+ void belle_sip_header_to_set_random_tag(belle_sip_header_to_t *obj){
+-	char tmp[8];
++	char tmp[37];
+ 	/*not less than 32bit */
+-	belle_sip_header_to_set_tag(obj,belle_sip_random_token(tmp,sizeof(tmp)));
++	/*belle_sip_header_to_set_tag(obj,belle_sip_random_token(tmp,sizeof(tmp)));*/
++	belle_sip_header_to_set_tag(obj,belle_sip_generate_uuid(tmp));
+ }
+ 
+ void belle_sip_header_to_set_tag(belle_sip_header_to_t *obj, const char *tag){

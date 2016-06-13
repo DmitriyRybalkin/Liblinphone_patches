@@ -1,0 +1,37 @@
+
+/* This patch guarantees that tags in SIP header FROM are generated as UUID instead of 
+ * using random token generation. It simply substitutes function belle_sip_random_token
+ * with the new one belle_sip_generate_uuid()
+ * NOTE: this patch is based on belle-sip library patch generate_callid_as_uuid.patch
+ * that adds function belle_sip_generate_uuid() to belle_sip_utils.c
+ * Author: Dmitriy Rybalkin <dmitriy.rybalkin@gmail.com>
+ */
+diff --git a/coreapi/bellesip_sal/sal_op_impl.c b/coreapi/bellesip_sal/sal_op_impl.c
+--- a/coreapi/bellesip_sal/sal_op_impl.c	2016-03-31 15:13:23.895752282 +0600
++++ b/coreapi/bellesip_sal/sal_op_impl.c	2016-03-31 15:39:01.007770459 +0600
+@@ -155,7 +155,8 @@
+ 
+ 	const SalAddress* to_address;
+ 	const MSList *elem=sal_op_get_route_addresses(op);
+-	char token[10];
++	/*char token[10];*/
++	char token[37];
+ 
+ 	/* check that the op has a correct to address */
+ 	to_address = sal_op_get_to_address(op);
+@@ -171,10 +171,13 @@
+ 	}
+ 
+ 	if (strcmp("REGISTER",method)==0 || op->privacy==SalPrivacyNone) {
++		/*from_header = belle_sip_header_from_create(BELLE_SIP_HEADER_ADDRESS(sal_op_get_from_address(op))
++						,belle_sip_random_token(token,sizeof(token)));*/
+ 		from_header = belle_sip_header_from_create(BELLE_SIP_HEADER_ADDRESS(sal_op_get_from_address(op))
+-						,belle_sip_random_token(token,sizeof(token)));
++						,belle_sip_generate_uuid(token));
+ 	} else {
+-		from_header=belle_sip_header_from_create2("Anonymous <sip:anonymous@anonymous.invalid>",belle_sip_random_token(token,sizeof(token)));
++		/*from_header=belle_sip_header_from_create2("Anonymous <sip:anonymous@anonymous.invalid>",belle_sip_random_token(token,sizeof(token)));*/
++		from_header=belle_sip_header_from_create2("Anonymous <sip:anonymous@anonymous.invalid>",belle_sip_generate_uuid(token));
+ 	}
+ 	/*make sure to preserve components like headers or port*/
+ 

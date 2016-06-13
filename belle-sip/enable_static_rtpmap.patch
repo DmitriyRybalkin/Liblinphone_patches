@@ -1,0 +1,15 @@
+/* This patch forces belle-sip library to include attribute
+ * a=rtpmap into SIP header for all static codecs like G729
+ * Author: Dmitriy Rybalkin <dmitriy.rybalkin@gmail.com>
+ */
+diff --git a/src/belle_sdp_impl.c b/src/belle_sdp_impl.c
+--- a/src/belle_sdp_impl.c	2016-03-29 16:33:36.576052361 +0600
++++ b/src/belle_sdp_impl.c	2016-03-29 16:35:36.576053780 +0600
+@@ -20,6 +20,7 @@
+ #include "grammars/belle_sdpLexer.h"
+ #include "belle_sip_internal.h"
+ 
++#define BELLE_SDP_FORCE_RTP_MAP "1"
+ 
+ struct _belle_sdp_mime_parameter {
+ 	belle_sip_object_t base;

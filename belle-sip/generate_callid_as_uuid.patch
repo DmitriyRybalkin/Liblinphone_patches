@@ -1,0 +1,80 @@
+/* This patch adds new function belle_sip_generate_uuid() to
+ * belle-sip library that is used for generating Call-ID SIP
+ * header as UUID sequence. This is done for making belle-sip
+ * library consistent with the requirements of most general SIP servers.
+ * Author: Dmitriy Rybalkin <dmitriy.rybalkin@gmail.com>
+ */
+diff --git a/configure.ac b/configure.ac
+--- a/configure.ac	2016-03-31 12:30:26.751532893 +0600
++++ b/configure.ac	2016-03-31 12:07:59.543516962 +0600
+@@ -385,6 +385,10 @@
+ AC_CHECK_LIB(pthread, pthread_getspecific,,
+     [AC_MSG_ERROR([pthread library not found])])
+ 
++AC_CHECK_LIB(uuid, uuid_generate,,
++    [AC_MSG_ERROR([uuid library not found])])
++LIBS="$LIBS -luuid"
++
+ AC_CONFIG_FILES(
+ [
+ Makefile
+diff --git a/src/belle_sip_utils.c b/src/belle_sip_utils.c
+--- a/src/belle_sip_utils.c	2016-03-31 12:05:49.279515422 +0600
++++ b/src/belle_sip_utils.c	2016-03-31 12:07:04.811516315 +0600
+@@ -21,6 +21,7 @@
+ #include <stddef.h>
+ #include <stdlib.h>
+ #include <sys/stat.h>
++#include <uuid/uuid.h>
+ #include "belle_sip_internal.h"
+ 
+ #include "clock_gettime.h" /*for apple*/
+@@ -780,6 +781,19 @@
+ }
+ 
+ /**
++ * Write uuid
++ **/
++char * belle_sip_generate_uuid(char *ret){
++	uuid_t uuid;
++	
++	uuid_generate(uuid);
++	
++	uuid_unparse_lower(uuid, ret);
++	
++	return ret;
++}
++
++/**
+  * Write random bytes of supplied size.
+ **/
+ unsigned char * belle_sip_random_bytes(unsigned char *ret, size_t size){
+diff --git a/include/belle-sip/utils.h b/include/belle-sip/utils.h
+--- a/include/belle-sip/utils.h		2016-03-31 15:17:09.887754954 +0600
++++ b/include/belle-sip/utils.h		2016-03-31 15:18:51.975756162 +0600
+@@ -166,6 +166,8 @@
+ 
+ BELLESIP_EXPORT char * belle_sip_random_token(char *ret, size_t size);
+ 
++BELLESIP_EXPORT char * belle_sip_generate_uuid(char *ret);
++
+ BELLESIP_EXPORT unsigned char * belle_sip_random_bytes(unsigned char *ret, size_t size);
+ 
+ BELLESIP_EXPORT char * belle_sip_octets_to_text(const unsigned char *hash, size_t hash_len, char *ret, size_t size);
+diff --git a/src/provider.c b/src/provider.c
+--- a/src/provider.c	2016-03-31 12:05:07.407514927 +0600
++++ b/src/provider.c	2016-03-31 12:06:33.035515939 +0600
+@@ -573,8 +572,12 @@
+ 
+ belle_sip_header_call_id_t * belle_sip_provider_create_call_id(const belle_sip_provider_t *prov){
+ 	belle_sip_header_call_id_t *cid=belle_sip_header_call_id_new();
+-	char tmp[11];
+-	belle_sip_header_call_id_set_call_id(cid,belle_sip_random_token(tmp,sizeof(tmp)));
++	/* char tmp[11]; */
++	char tmp[37];
++	
++	/*belle_sip_header_call_id_set_call_id(cid,belle_sip_random_token(tmp,sizeof(tmp)));*/
++	belle_sip_header_call_id_set_call_id(cid,belle_sip_generate_uuid(tmp));
++	
+ 	return cid;
+ }

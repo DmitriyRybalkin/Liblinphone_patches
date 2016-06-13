@@ -1,0 +1,18 @@
+/* This patch forces linphone to include attribute a=sendrecv to SIP header
+ * as the most of SIP servers require this attribute for proper communication
+ * Author: Dmitriy Rybalkin <dmitriy.rybalkin@gmail.com>
+ */
+diff --git a/coreapi/bellesip_sal/sal_sdp.c b/coreapi/bellesip_sal/sal_sdp.c
+--- a/coreapi/bellesip_sal/sal_sdp.c	2016-03-30 15:22:49.649005367 +0600
++++ b/coreapi/bellesip_sal/sal_sdp.c	2016-03-30 15:23:08.413005589 +0600
+@@ -289,8 +289,8 @@
+ 
+ 	switch ( stream->dir ) {
+ 		case SalStreamSendRecv:
+-			/*dir="sendrecv";*/
+-			dir=NULL;
++			dir="sendrecv";
++			/*dir=NULL;*/
+ 			break;
+ 		case SalStreamRecvOnly:
+ 			dir="recvonly";

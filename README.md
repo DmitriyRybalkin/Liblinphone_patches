@@ -1,0 +1,2 @@
+# Linphone patches 
+These patches are generally purposed for making format of [Linphone](http://www.linphone.org/about.html) SIP calls and SDP messages considerably similar to those that are issued by well-known SIP clients like, for instance, Grandstream, AudioCodes, Cisco, etc.
